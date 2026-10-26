@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Support Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-firestore-compat.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-pink-500 selection:text-white">
+    <div id="app" class="max-w-4xl mx-auto px-4 py-6 pb-24">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 bg-slate-900/80 backdrop-blur border border-slate-800 p-4 rounded-2xl shadow-xl">
+            <div>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-2">
+                    <i class="fa-solid fa-heart-pulse text-pink-500"></i> Partner Support
+                </h1>
+                <p class="text-xs text-slate-400">Care & Rhythm Dashboard for Rehana</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openSettings()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-gear text-pink-400"></i> Cycle Setup
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard View -->
+        <main class="space-y-6">
+            <!-- Phase Overview Card -->
+            <section class="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div id="phaseContent" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    <!-- Progress / Day Ring -->
+                    <div class="flex flex-col items-center justify-center bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 text-center">
+                        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Current Cycle Day</div>
+                        <div id="currentDayDisplay" class="text-4xl font-ext500 font-bold text-white my-1">Day --</div>
+                        <div id="phaseNameDisplay" class="text-sm font-medium px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">Loading...</div>
+                    </div>
+                    <!-- Phase Summary & Energy -->
+                    <div class="md:col-span-2 space-y-3">
+                        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-seedling text-emerald-400"></i> Phase Focus & Energy
+                        </h2>
+                        <p id="phaseDescriptionDisplay" class="text-sm text-slate-300 leading-relaxed">
+                            Loading phase description and biological insights...
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-1 text-xs text-slate-400">
+                            <span class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/50 flex items-center gap-1.5"><i class="fa-solid fa-calendar-day text-pink-400"></i> <span id="startDateDisplay">Not set</span></span>
+                            <span class="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/50 flex items-center gap-1.5"><i class="fa-solid fa-rotate text-purple-400"></i> 28-Day Cycle</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grid of Cards: To-Dos, Meals, Messages -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Daily To-Do Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-blue-400"></i> Daily Action To-Do
+                            </h3>
+                            <span class="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/20 px-2.5 py-1 rounded-full">Phase Specific</span>
+                        </div>
+                        <p id="todoTextDisplay" class="text-sm text-slate-300 leading-relaxed bg-slate-950/40 p-4 rounded-2xl border border-slate-800/60">
+                            Loading action items...
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400 flex items-center justify-between">
+                        <span>Status: Active Support</span>
+                        <span class="text-pink-400 font-medium">Prioritize rest & care</span>
+                    </div>
+                </div>
+
+                <!-- Meal & Food Ideas Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-utensils text-amber-400"></i> Meal & Treat Ideas
+                            </h3>
+                            <span class="text-xs bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2.5 py-1 rounded-full">Nutrition</span>
+                        </div>
+                        <p id="mealTextDisplay" class="text-sm text-slate-300 leading-relaxed bg-slate-950/40 p-4 rounded-2xl border border-slate-800/60">
+                            Loading nutritional guidance...
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400 flex items-center justify-between">
+                        <span>Focus: Balanced Blood Sugar</span>
+                        <span class="text-amber-400 font-medium">Protein & Magnesium</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Supportive Text Message -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-message text-pink-400"></i> Text Message to Send
+                            </h3>
+                            <button onclick="refreshMessage()" class="text-xs bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate-right"></i> Refresh Idea
+                            </button>
+                        </div>
+                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-2xl relative mb-3">
+                            <p id="messageTextDisplay" class="text-sm text-slate-200 italic leading-relaxed">
+                                "Loading message..."
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="copyMessage()" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-pink-600/20">
+                        <i class="fa-regular fa-copy"></i> Copy Message to Clipboard
+                    </button>
+                </div>
+
+                <!-- Random Affectionate Conversation Starter -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-comments text-purple-400"></i> Affectionate Starter
+                            </h3>
+                            <button onclick="refreshStarter()" class="text-xs bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate-right"></i> New Starter
+                            </button>
+                        </div>
+                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-2xl relative mb-3">
+                            <p id="starterTextDisplay" class="text-sm text-slate-200 italic leading-relaxed">
+                                "Loading conversation starter..."
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="copyStarter()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20">
+                        <i class="fa-regular fa-copy"></i> Copy Starter to Clipboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Daily Activity Tracker & Calendar Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Daily Counters & Notes (2 cols) -->
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-emerald-400"></i> Daily Log & Habits
+                            </h3>
+                            <p id="selectedDateLabel" class="text-xs text-slate-400 mt-0.5">Tracking for Today</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="date" id="datePicker" onchange="onDateChanged(this.value)" class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-pink-500">
+                            <button onclick="jumpToToday()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 transition">Today</button>
+                        </div>
+                    </div>
+
+                    <!-- Counters Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <!-- Tea Counter -->
+                        <div class="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <span class="text-xs text-slate-400 mb-1">Cups of Tea</span>
+                            <span id="counter-tea" class="text-2xl font-bold text-amber-300 my-1">0</span>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button onclick="adjustCounter('tea', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">-</button>
+                                <button onclick="adjustCounter('tea', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">+</button>
+                            </div>
+                        </div>
+                        <!-- Cigarettes Counter -->
+                        <div class="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <span class="text-xs text-slate-400 mb-1">Cigarettes</span>
+                            <span id="counter-cigarettes" class="text-2xl font-bold text-rose-400 my-1">0</span>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button onclick="adjustCounter('cigarettes', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">-</button>
+                                <button onclick="adjustCounter('cigarettes', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">+</button>
+                            </div>
+                        </div>
+                        <!-- Water Counter -->
+                        <div class="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <span class="text-xs text-slate-400 mb-1">Water (Glasses)</span>
+                            <span id="counter-water" class="text-2xl font-bold text-blue-400 my-1">0</span>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button onclick="adjustCounter('water', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">-</button>
+                                <button onclick="adjustCounter('water', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">+</button>
+                            </div>
+                        </div>
+                        <!-- Other Counter -->
+                        <div class="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <span class="text-xs text-slate-400 mb-1">Other</span>
+                            <span id="counter-other" class="text-2xl font-bold text-purple-400 my-1">0</span>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button onclick="adjustCounter('other', -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">-</button>
+                                <button onclick="adjustCounter('other', 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-xs transition">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Notes -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Daily Notes & Observations</label>
+                        <textarea id="dailyNotesInput" oninput="saveDailyNotes(this.value)" placeholder="Jot down any notes, moods, or reminders for this day..." class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-pink-500 h-24 resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Monthly Calendar (1 col) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 id="calMonthTitle" class="text-base font-semibold text-white">Month Year</h3>
+                            <div class="flex items-center gap-1">
+                                <button onclick="changeMonth(-1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button onclick="changeMonth(1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs flex items-center justify-center"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <!-- Weekday Headers -->
+                        <div class="grid grid-cols-7 text-center text-[10px] uppercase font-semibold text-slate-500 mb-2">
+                            <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+                        </div>
+                        <!-- Calendar Days Grid -->
+                        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-xs">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-pink-500"></span> Cycle Day</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Logged Data</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Cycle Setup Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-6">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-pink-500"></i> Cycle Configuration
+                </h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-sm text-slate-400">Enter the start date of her most recent cycle (Day 1) to synchronize the entire dashboard automatically.</p>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-2">Cycle Start Date (Day 1)</label>
+                <input type="date" id="modalStartDateInput" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-pink-500">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeSettings()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-3 rounded-xl text-sm transition">Cancel</button>
+                <button onclick="saveCycleStartDate()" class="flex-1 bg-pink-600 hover:bg-pink-500 text-white font-medium py-3 rounded-xl text-sm transition shadow-lg shadow-pink-600/20">Save & Sync</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-slate-700 text-slate-200 px-4 py-3 rounded-2xl shadow-2xl text-xs flex items-center gap-2 transition-all duration-300 translate-y-20 opacity-0 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toastMessage">Action completed successfully</span>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyForLocalDemo12345",
+            authDomain: "partner-support-app.firebaseapp.com",
+            projectId: "partner-support-app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const USER_ID = "cezan_patel";
+
+        // Phase Data Definitions
+        const PHASES = [
+            {
+                name: "Menstrual Phase",
+                days: [1, 5],
+                badgeColor: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+                description: "Hormones are at their lowest, meaning her energy is likely depleted. This is a time for rest, comfort, and taking things entirely off her plate.",
+                todos: [
+                    "Take over the invisible labor completely. Handle bedtime routines with the boys entirely so she can get to bed early.",
+                    "Manage household chaos and clean up before she has to ask.",
+                    "Draw her a relaxing warm bath and keep the evening peaceful."
+                ],
+                meals: [
+                    "Iron-rich, warm, comforting meals (e.g., hearty stews or red meat) to replenish iron levels.",
+                    "Bring her dark chocolate—high in magnesium to naturally soothe cramps.",
+                    "Warm herbal teas like ginger or chamomile."
+                ],
+                messages: [
+                    "Thinking of you today. Don't worry about dinner or the boys tonight, I’m handling it all. Just rest when you get a moment.",
+                    "I know your energy is low today, babe. Let me take care of everything around the house—just focus on resting.",
+                    "Sending you extra warmth and love today. Let me know what comfort food you're craving tonight!"
+                ]
+            },
+            {
+                name: "Follicular Phase",
+                days: [6, 13],
+                badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+                description: "Estrogen is rising. Her energy, mood, and creativity will start to peak. She will likely feel more social, upbeat, and ready to tackle new ideas.",
+                todos: [
+                    "Match her rising energy. Plan a date night or suggest a fun family outing to Crescent Park.",
+                    "Actively encourage any new ideas, projects, or plans she brings up.",
+                    "Tackle an outdoor family activity or weekend adventure together."
+                ],
+                meals: [
+                    "Light, fresh, and colorful foods: crisp salads, lean proteins, and fresh fruit.",
+                    "Treat her to an iced coffee, smoothie, or refreshing juice while out and about.",
+                    "Hydrating foods like cucumbers, berries, and citrus."
+                ],
+                messages: [
+                    "You looked incredible this morning. Let's do something fun this weekend—I'll plan the whole thing.",
+                    "Your energy lately is so inspiring. Let's plan a special date night just for us this week!",
+                    "Loved hearing your ideas this morning. You're going to crush everything you touch today."
+                ]
+            },
+            {
+                name: "Ovulatory Phase",
+                days: [14, 16],
+                badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+                description: "Estrogen and testosterone peak. This is a short, high-energy window where she is likely feeling her most confident, vibrant, and communicative.",
+                todos: [
+                    "Be extra affectionate, complimentary, and present.",
+                    "Great time to tackle larger household projects together as a team or host friends for dinner.",
+                    "Capture photos and make the most of her vibrant, social mood."
+                ],
+                meals: [
+                    "Keep her hydrated with fresh water and electrolyte drinks.",
+                    "Lighter meals featuring high-fiber vegetables (like broccoli and spinach) which help the body naturally process estrogen.",
+                    "Antioxidant-rich berries and clean lean proteins."
+                ],
+                messages: [
+                    "Can't stop thinking about you today. See you tonight. 😉",
+                    "You light up every room you walk into. So lucky you're mine.",
+                    "Let's make tonight special—just you and me."
+                ]
+            },
+            {
+                name: "Luteal Phase",
+                days: [17, 28],
+                badgeColor: "bg-amber-500/20 text-amber-300 border-amber-300",
+                description: "Progesterone rises and then sharply drops (PMS window). Her metabolic rate increases here, but she may also feel more sensitive, easily overwhelmed, or tired.",
+                todos: [
+                    "Give her maximum grace and patience. If she seems frustrated, don't take it personally.",
+                    "Take the boys out for a few hours so she gets an empty house entirely to herself.",
+                    "Keep evenings calm, quiet, and low-pressure."
+                ],
+                meals: [
+                    "Higher protein and complex carbohydrates (like sweet potatoes, quinoa, and whole grains) to stabilize blood sugar and mood.",
+                    "Avoid heavy, refined sugars to prevent energy crashes and irritability.",
+                    "Magnesium-rich snacks like almonds or pumpkin seeds."
+                ],
+                messages: [
+                    "I know it's been a long week and you've been working hard. I'm taking the boys out for a bit later—take some time entirely for yourself.",
+                    "Just a reminder of how much I appreciate everything you do. Take it easy tonight, I've got dinner sorted.",
+                    "Sending you a massive virtual hug. You're doing amazing, and I'm right here in your corner."
+                ]
+            }
+        ];
+
+        const CONVERSATION_STARTERS = [
+            "What's one thing I can do today to immediately make your day 1% easier?",
+            "If we could teleport anywhere in the world for a 48-hour getaway this weekend, where would you pick?",
+            "What's been on your mind lately that you'd like to vent about or brainstorm together?",
+            "What was your favorite memory of us from this past month?",
+            "If you had a completely free afternoon with zero responsibilities or chores, how would you spend it?",
+            "What's a meal or treat you've been craving lately that I can surprise you with?",
+            "What is something I did recently that made you feel appreciated?"
+        ];
+
+        let cycleStartDate = "2026-10-01"; // Default fallback
+        let selectedDate = new Date().toISOString().split('T')[0];
+        let currentCalDate = new Date();
+        let messageIndex = 0;
+        let starterIndex = 0;
+        let appDataCache = {};
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('datePicker').value = selectedDate;
+            await loadUserData();
+            renderCalendar();
+            updateDashboard();
+        });
+
+        // Load data from localStorage fallback & mock Firebase sync
+        async function loadUserData() {
+            try {
+                const docRef = db.collection('users').doc(USER_ID);
+                const doc = await docRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.cycleStartDate) cycleStartDate = data.cycleStartDate;
+                    if (data.logs) appDataCache = data.logs;
+                } else {
+                    const localData = localStorage.getItem('partner_support_data');
+                    if (localData) {
+                        const parsed = JSON.parse(localData);
+                        if (parsed.cycleStartDate) cycleStartDate = parsed.cycleStartDate;
+                        if (parsed.logs) appDataCache = parsed.logs;
+                    }
+                }
+            } catch (e) {
+                console.log("Offline mode or Firebase unavailable, using local cache.");
+                const localData = localStorage.getItem('partner_support_data');
+                if (localData) {
+                    const parsed = JSON.parse(localData);
+                    if (parsed.cycleStartDate) cycleStartDate = parsed.cycleStartDate;
+                    if (parsed.logs) appDataCache = parsed.logs;
+                }
+            }
+        }
+
+        async function saveToDatabase() {
+            const payload = { cycleStartDate, logs: appDataCache };
+            localStorage.setItem('partner_support_data', JSON.stringify(payload));
+            try {
+                await db.collection('users').doc(USER_ID).set(payload, { merge: true });
+            } catch (e) {
+                console.log("Saved locally (offline mode).");
+            }
+        }
+
+        // Calculate current phase based on cycle start date
+        function getPhaseForDate(targetDateStr) {
+            const start = new Date(cycleStartDate);
+            const target = new Date(targetDateStr);
+            const diffTime = target - start;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (isNaN(diffDays) || diffDays < 0) {
+                // If target is before start date, project backwards or default to day 1
+                const dayInCycle = ((diffDays % 28) + 28) % 28 + 1;
+                return getPhaseByDayNumber(dayInCycle);
+            }
+            
+            const dayInCycle = (diffDays % 28) + 1;
+            return getPhaseByDayNumber(dayInCycle);
+        }
+
+        function getPhaseByDayNumber(dayNum) {
+            for (let phase of PHASES) {
+                if (dayNum >= phase.days[0] && dayNum <= phase.days[1]) {
+                    return { phase, dayNum };
+                }
+            }
+            return { phase: PHASES[3], dayNum }; // Default Luteal
+        }
+
+        function updateDashboard() {
+            document.getElementById('startDateDisplay').innerText = `Start: ${cycleStartDate}`;
+            
+            const { phase, dayNum } = getPhaseForDate(selectedDate);
+            
+            document.getElementById('currentDayDisplay').innerText = `Day ${dayNum}`;
+            const badgeEl = document.getElementById('phaseNameDisplay');
+            badgeEl.className = `text-sm font-medium px-3 py-1 rounded-full border ${phase.badgeColor}`;
+            badgeEl.innerText = phase.name;
+            document.getElementById('phaseDescriptionDisplay').innerText = phase.description;
+
+            // To-Dos (pick one rotation based on dayNum)
+            const todoIdx = dayNum % phase.todos.length;
+            document.getElementById('todoTextDisplay').innerText = phase.todos[todoIdx];
+
+            // Meals
+            const mealIdx = dayNum % phase.meals.length;
+            document.getElementById('mealTextDisplay').innerText = phase.meals[mealIdx];
+
+            // Messages
+            const msgIdx = (messageIndex + dayNum) % phase.messages.length;
+            document.getElementById('messageTextDisplay').innerText = `"${phase.messages[msgIdx]}"`;
+
+            // Conversation Starter
+            const starterIdxFinal = (starterIndex + dayNum) % CONVERSATION_STARTERS.length;
+            document.getElementById('starterTextDisplay').innerText = `"${CONVERSATION_STARTERS[starterIdxFinal]}"`;
+
+            // Update Counters for selected date
+            const dayLog = appDataCache[selectedDate] || { tea: 0, cigarettes: 0, water: 0, other: 0, notes: '' };
+            document.getElementById('counter-tea').innerText = dayLog.tea || 0;
+            document.getElementById('counter-cigarettes').innerText = dayLog.cigarettes || 0;
+            document.getElementById('counter-water').innerText = dayLog.water || 0;
+            document.getElementById('counter-other').innerText = dayLog.other || 0;
+            document.getElementById('dailyNotesInput').value = dayLog.notes || '';
+
+            const dateFormatted = new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('selectedDateLabel').innerText = `Tracking for ${dateFormatted}`;
+        }
+
+        function refreshMessage() {
+            const { phase, dayNum } = getPhaseForDate(selectedDate);
+            messageIndex = (messageIndex + 1) % phase.messages.length;
+            const msgIdx = (messageIndex + dayNum) % phase.messages.length;
+            document.getElementById('messageTextDisplay').innerText = `"${phase.messages[msgIdx]}"`;
+            showToast("New supportive message loaded");
+        }
+
+        function refreshStarter() {
+            starterIndex = (starterIndex + 1) % CONVERSATION_STARTERS.length;
+            const starterIdxFinal = (starterIndex + getPhaseForDate(selectedDate).dayNum) % CONVERSATION_STARTERS.length;
+            document.getElementById('starterTextDisplay').innerText = `"${CONVERSATION_STARTERS[starterIdxFinal]}"`;
+            showToast("New conversation starter loaded");
+        }
+
+        function copyMessage() {
+            const text = document.getElementById('messageTextDisplay').innerText.replace(/^"|"$/g, '');
+            navigator.clipboard.writeText(text);
+            showToast("Message copied to clipboard!");
+        }
+
+        function copyStarter() {
+            const text = document.getElementById('starterTextDisplay').innerText.replace(/^"|"$/g, '');
+            navigator.clipboard.writeText(text);
+            showToast("Conversation starter copied to clipboard!");
+        }
+
+        // Counter logic
+        async function adjustCounter(type, delta) {
+            if (!appDataCache[selectedDate]) {
+                appDataCache[selectedDate] = { tea: 0, cigarettes: 0, water: 0, other: 0, notes: '' };
+            }
+            appDataCache[selectedDate][type] = Math.max(0, (appDataCache[selectedDate][type] || 0) + delta);
+            document.getElementById(`counter-${type}`).innerText = appDataCache[selectedDate][type];
+            await saveToDatabase();
+            renderCalendar();
+        }
+
+        async function saveDailyNotes(val) {
+            if (!appDataCache[selectedDate]) {
+                appDataCache[selectedDate] = { tea: 0, cigarettes: 0, water: 0, other: 0, notes: '' };
+            }
+            appDataCache[selectedDate].notes = val;
+            await saveToDatabase();
+            renderCalendar();
+        }
+
+        function onDateChanged(dateStr) {
+            if (!dateStr) return;
+            selectedDate = dateStr;
+            updateDashboard();
+        }
+
+        function jumpToToday() {
+            selectedDate = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = selectedDate;
+            updateDashboard();
+        }
+
+        // Calendar Logic
+        function renderCalendar() {
+            const grid = document.getElementById('calendarDaysGrid');
+            grid.innerHTML = '';
+            
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('calMonthTitle').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7; // Monday start
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            // Padding days
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                grid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                cell.className = "aspect-square rounded-xl flex flex-col items-center justify-center relative cursor-pointer transition border border-transparent hover:border-slate-700 text-slate-300";
+                
+                if (dayStr === selectedDate) {
+                    cell.classList.add('bg-slate-800', 'border-pink-500/60', 'font-bold', 'text-white');
+                } else {
+                    cell.classList.add('bg-slate-950/40');
+                }
+
+                // Check if cycle day marker
+                const { dayNum } = getPhaseForDate(dayStr);
+                const hasLogs = appDataCache[dayStr] && (appDataCache[dayStr].tea > 0 || appDataCache[dayStr].cigarettes > 0 || appDataCache[dayStr].water > 0 || appDataCache[dayStr].other > 0 || appDataCache[dayStr].notes);
+
+                cell.innerHTML = `
+                    <span class="text-xs">${day}</span>
+                    <div class="flex items-center gap-1 mt-0.5">
+                        ${dayNum === 1 ? '<span class="w-1.5 h-1.5 rounded-full bg-pink-500" title="Cycle Day 1"></span>' : ''}
+                        ${hasLogs ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Logged Data"></span>' : ''}
+                    </div>
+                `;
+
+                cell.onclick = () => {
+                    selectedDate = dayStr;
+                    document.getElementById('datePicker').value = selectedDate;
+                    updateDashboard();
+                    renderCalendar();
+                };
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function changeMonth(dir) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + dir);
+            renderCalendar();
+        }
+
+        // Settings Modal
+        function openSettings() {
+            document.getElementById('modalStartDateInput').value = cycleStartDate;
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        async function saveCycleStartDate() {
+            const val = document.getElementById('modalStartDateInput').value;
+            if (val) {
+                cycleStartDate = val;
+                await saveToDatabase();
+                closeSettings();
+                updateDashboard();
+                renderCalendar();
+                showToast("Cycle start date updated successfully!");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
